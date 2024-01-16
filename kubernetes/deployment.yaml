@@ -24,6 +24,11 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: SUPABASE_SERVICE_KEY
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: STRIPE_SECRET_KEY
           resources:
             limits:
               cpu: "0.1"
