@@ -48,7 +48,9 @@ export class SupabaseService {
       throw new Error(error.message);
     }
 
-    const { user } = await this.supabase.auth.admin.getUserById(userId);
+    const {
+      data: { user },
+    } = await this.supabase.auth.admin.getUserById(userId);
 
     return {
       user_id: data.user_id,
