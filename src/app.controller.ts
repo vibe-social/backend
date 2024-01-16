@@ -9,7 +9,7 @@ export class AppController {
     private readonly supabaseService: SupabaseService,
   ) {}
 
-  @Post('/user/:userId/update')
+  @Post('/backend/user/:userId/update')
   async updateMood(
     @Param('userId') userId: string,
     @Body() data: { latitude: number; longitude: number; mood: string },
@@ -23,25 +23,25 @@ export class AppController {
     return { message: 'success' };
   }
 
-  @Get('/user/:userId/data')
+  @Get('/backend/user/:userId/data')
   async getUserData(@Param('userId') userId: string) {
     const data = await this.supabaseService.getUserData(userId);
     return data;
   }
 
-  @Get('/users/data')
+  @Get('/backend/users/data')
   async getAllUserData() {
     const data = await this.supabaseService.getAllUsersData();
     return data;
   }
 
-  @Post('/user/:userId/purchase')
+  @Post('/backend/user/:userId/purchase')
   async createCheckoutSession(@Param('userId') userId: string) {
     const session = await this.stripeService.createCheckoutSession(userId);
     return { url: session.url };
   }
 
-  @Get('/health')
+  @Get('/backend/health')
   async healthCheck() {
     return { message: 'success' };
   }
