@@ -37,7 +37,9 @@ export class AppController {
 
   @Post('/backend/user/:userId/purchase')
   async createCheckoutSession(@Param('userId') userId: string) {
-    const session = await this.stripeService.createCheckoutSession(userId);
+    const clientId = await this.supabaseService.getClientId(userId);
+    console.log(clientId);
+    const session = await this.stripeService.createCheckoutSession(clientId);
     return { url: session.url };
   }
 

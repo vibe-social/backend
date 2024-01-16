@@ -1,12 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
+import Stripe from 'stripe';
 
 export class SupabaseService {
   private supabase;
+  private stripe;
 
   constructor() {
     const supabaseUrl = 'https://infrvzrylskidrzrpubu.supabase.co';
     const supabaseKey = process.env.SUPABASE_SERVICE_KEY!;
     this.supabase = createClient(supabaseUrl, supabaseKey);
+
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    this.stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' });
   }
 
   async postUpdate(
@@ -43,6 +48,8 @@ export class SupabaseService {
       throw new Error(error.message);
     }
 
+    const { user } = await this.supabase.auth.admin.getUserById(userId);
+
     return {
       user_id: data.user_id,
       latitude: data.latitude,
@@ -52,6 +59,7 @@ export class SupabaseService {
       ts: data.timestamp,
       user: {
         id: userId,
+        email: user.email,
       },
     };
   }
@@ -77,5 +85,40 @@ export class SupabaseService {
         .map((u) => ({ id: u.id, email: u.email }))
         .find((u) => u.id === row.user_id),
     }));
+  }
+
+  async getClientId(userId: string): Promise<string> {
+    const { data, error } = await this.supabase
+      .from('clients')
+      .select('stripe_customer_id')
+      .eq('user_id', userId)
+      .limit(1);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (data.length === 0) {
+      const { data: user } = await this.supabase.auth.admin.getUserById(userId);
+      const customer = await this.createCustomer(user.email);
+      await this.supabase.from('clients').insert([
+        {
+          user_id: userId,
+          stripe_customer_id: customer.id,
+        },
+      ]);
+
+      return customer.id;
+    }
+
+    return data.stripe_customer_id;
+  }
+
+  async createCustomer(email: string): Promise<Stripe.Customer> {
+    const customer = await this.stripe.customers.create({
+      email: email,
+    });
+
+    return customer;
   }
 }

@@ -9,9 +9,10 @@ export class StripeService {
   }
 
   async createCheckoutSession(
-    userId: string,
+    clientId: string,
   ): Promise<Stripe.Checkout.Session> {
     const session = await this.stripe.checkout.sessions.create({
+      customer: clientId,
       payment_method_types: ['card'],
       line_items: [
         {
@@ -29,9 +30,6 @@ export class StripeService {
       mode: 'payment',
       success_url: 'https://www.tryvibe.com/success',
       cancel_url: 'https://www.tryvibe.com/cancel',
-      metadata: {
-        userId: userId,
-      },
     });
 
     return session;
