@@ -32,13 +32,13 @@ spec:
           resources:
             limits:
               cpu: "0.1"
-              memory: "512Mi"
+              memory: "256Mi"
             requests:
               cpu: "0.01"
-              memory: "64Mi"
+              memory: "32Mi"
           readinessProbe:
             httpGet:
-              path: /health
+              path: /backend/health
               port: 8080
             initialDelaySeconds: 60
             periodSeconds: 30
@@ -47,7 +47,7 @@ spec:
             failureThreshold: 30
           livenessProbe:
             httpGet:
-              path: /health
+              path: /backend/health
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
