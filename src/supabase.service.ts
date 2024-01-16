@@ -102,7 +102,6 @@ export class SupabaseService {
       const {
         data: { user },
       } = await this.supabase.auth.admin.getUserById(userId);
-      console.log(user);
       const customer = await this.createCustomer(user.email);
       await this.supabase.from('clients').insert([
         {
