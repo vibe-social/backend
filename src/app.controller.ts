@@ -2,14 +2,14 @@ import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
 import { StripeService } from './stripe.service';
 
-@Controller()
+@Controller('backend/rest/')
 export class AppController {
   constructor(
     private readonly stripeService: StripeService,
     private readonly supabaseService: SupabaseService,
   ) {}
 
-  @Post('/backend/user/:userId/update')
+  @Post('/user/:userId/update')
   async updateMood(
     @Param('userId') userId: string,
     @Body() data: { latitude: number; longitude: number; mood: string },
@@ -23,26 +23,44 @@ export class AppController {
     return { message: 'success' };
   }
 
-  @Get('/backend/user/:userId/data')
+  @Get('/user/:userId/data')
   async getUserData(@Param('userId') userId: string) {
     const data = await this.supabaseService.getUserData(userId);
     return data;
   }
 
-  @Get('/backend/users/data')
+  @Get('/user/:ip_address/geocode')
+  async getGeocodeLocation(@Param('ip_address') ip_address: string) {
+    const data = await fetch(
+      'http://vibe-social.westeurope.cloudapp.azure.com/location-discovery/geocode',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          ip_address: ip_address,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    ).then((res) => res.json());
+
+    return data;
+  }
+
+  @Get('/users/data')
   async getAllUserData() {
     const data = await this.supabaseService.getAllUsersData();
     return data;
   }
 
-  @Post('/backend/user/:userId/purchase')
+  @Post('/user/:userId/purchase')
   async createCheckoutSession(@Param('userId') userId: string) {
     const clientId = await this.supabaseService.getClientId(userId);
     const session = await this.stripeService.createCheckoutSession(clientId);
     return { url: session.url };
   }
 
-  @Get('/backend/health')
+  @Get('/health')
   async healthCheck() {
     return { message: 'success' };
   }
